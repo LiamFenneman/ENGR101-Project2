@@ -1,11 +1,9 @@
 #include "video_proc.hpp"
 #include <math.h>
 
-bool isPixelRed(Pixel p);
-
 int main(){
 
-	//float avg_redness = 0;	// average redness of images looped over
+	float avg_redness = 0;	// average redness of images looped over
     int nFrames = 20;
     for ( int iFrame = 0; iFrame < nFrames ; iFrame++){
 		// produce file name of "X.ppm" type where X goes from 0 to number of images
@@ -18,7 +16,9 @@ int main(){
 		OpenPPMFile(fileName);
 		
 	
-		int sum_red = 0;
+		int totred = 0;
+		int totint = 0;
+		float redness = 0;
         Pixel curPix;
         for ( int row =0 ; row < image.height ; row++)
 	    {	
@@ -26,9 +26,9 @@ int main(){
 		  {
 			  curPix = get_pixel(row,column);
 			  
-			  if (isPixelRed(curPix)){
-				  sum_red++;
-			  }
+			  totred = totred + (int)curPix.red;
+			  totint = totint + ((int)curPix.red+(int)curPix.green+(int)curPix.blue)/3;
+			  redness = (float)totred/(3.0*(float)totint);
 			  
 			  //totred = totred + (int)get_pixel(row,column,0);
 			  //totint = totint + (int)get_pixel(row,column,3);
@@ -40,25 +40,18 @@ int main(){
 	    // if the difference is more than 0.005 the ruby is defined as mising.
 	    // since this is using an average this check will only be applied when checking the second frame
 	    // this means i assumed the ruby is there during the first frame.
-	    if (sum_red > 1) {
+	    if (iFrame > 0 && std::abs(avg_redness-redness) > 0.005) {
+			cout<<"Ruby is missing!"<<endl;
+		}
+		else if (iFrame > 0) {
+			avg_redness = (avg_redness+redness)/(float)2;
 			cout<<"Ruby is present."<<endl;
 		}
 		else {
-			cout<<"Ruby is missing!"<<endl;
+			avg_redness = redness;
+			cout<<"Ruby is present."<<endl;
 		}
 	}
 	
 	return 0; 
-}
-
-bool isPixelRed(Pixel p) {
-	int r = (int)p.red;
-	int g = (int)p.green;
-	int b = (int)p.blue;
-	
-	if (r > g && r > b)
-		return true;
-	
-	return false;
-		
 }
