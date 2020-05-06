@@ -1,10 +1,11 @@
 #include "video_proc.hpp"
 #include <math.h>
+#include <vector>
 
 bool isPixelRed(Pixel p);
 
 int main(){
-	vector<int> redPixels;
+	vector<int> redPixelTarget;
     int nFrames = 20;
     for ( int iFrame = 0; iFrame < nFrames ; iFrame++){
 		// produce file name of "X.ppm" type where X goes from 0 to number of images
@@ -16,36 +17,33 @@ int main(){
 		// open image file
 		OpenPPMFile(fileName);
 		
-	
-		int sum_red = 0;
         Pixel curPix;
         int iPixel = 0;
-        vector<int> frameRedPixels
+        int sum_red = 0;
         for ( int row =0 ; row < image.height ; row++)
 	    {	
 		  for ( int column = 0; column < image.width ; column++)
 		  {
 			  curPix = get_pixel(row,column);
-			  
-			  if (isPixelRed(curPix)==true){
+			  if (isPixelRed(curPix)) {
+				  if(iFrame == 0)
+					redPixelTarget.push_back(iPixel);
 				  sum_red++;
-				  frameRedPixels.push_back(iPixel);
 			  }
 			  
 			  iPixel++;
-		   }  
+		   }
 	    }
 	    
-	    if (iFrame == 0) {
-			redPixels = frameRedPixels;
-		}
+	    cout<<redPixelTarget.size()-sum_red<<endl;
 	    
-	    if (std::abs(redPixels.size()-frameRedPixels.size()) < 10) {
-			cout<<"Ruby is present."<<endl;
+	    if (std::abs(10-sum_red) > 100) {
+			cout<<"Missing"<<endl;
 		}
 		else {
-			cout<<"Ruby is missing!"<<endl;
+			cout<<"Present"<<endl;
 		}
+	    
 	}
 	
 	return 0;
